@@ -10,17 +10,15 @@ NIGHT_END = 5
 
 
 def load_attempts():
-    number_of_pages = None
-    if number_of_pages is None:
-        params = {'page': 1}
-        devman_data = requests.get(DEVMAN_API_URL, params).json()
-        number_of_pages = int(devman_data['number_of_pages'])
-        yield from devman_data['records']
-    
-    for page in range(2, number_of_pages + 1):
+    number_of_pages = 1
+    page = 1
+    while page <= number_of_pages:
         params = {'page': page}
         devman_data = requests.get(DEVMAN_API_URL, params).json()
         yield from devman_data['records']
+        if number_of_pages == 1:
+            number_of_pages = int(devman_data['number_of_pages'])
+        page += 1
 
 
 def get_midnighters(records):
@@ -43,13 +41,16 @@ def get_midnighters(records):
     return midnighters_set, warnings
 
 
-if __name__ == '__main__':
-    records = load_attempts()
-    midnighters, warnings = get_midnighters(records)
+def print_midnighters(midnighters, warnings):
     print('\nWarnings:')
     for warning in warnings:
         print(warning)
-    
     print('\nMidnighters:')
     for midnighter in midnighters:
         print(midnighter)
+
+
+if __name__ == '__main__':
+    records = load_attempts()
+    midnighters, warnings = get_midnighters(records)
+    print_midnighters(midnighters, warnings)
